@@ -1815,7 +1815,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     // Start enforcing BIP68 (sequence locks) and BIP112 (CHECKSEQUENCEVERIFY) using versionbits logic.
     int nLockTimeFlags = 0;
-    if (VersionBitsState(pindex->pprev, chainparams.GetConsensus(), Consensus::DEPLOYMENT_CSV, versionbitscache) == THRESHOLD_ACTIVE) {
+    if (IsCsvEnabled(pindex->pprev, chainparams.GetConsensus())) {
         flags |= SCRIPT_VERIFY_CHECKSEQUENCEVERIFY;
         nLockTimeFlags |= LOCKTIME_VERIFY_SEQUENCE;
     }
@@ -2886,6 +2886,11 @@ static bool CheckIndexAgainstCheckpoint(const CBlockIndex* pindexPrev, CValidati
     return true;
 }
 
+bool IsCsvEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params)
+{
+    return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_CSV, versionbitscache) == THRESHOLD_ACTIVE);
+}
+
 bool IsWitnessEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params)
 {
     LOCK(cs_main);
@@ -2978,7 +2983,7 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, const Co
 
     // Start enforcing BIP113 (Median Time Past) using versionbits logic.
     int nLockTimeFlags = 0;
-    if (VersionBitsState(pindexPrev, consensusParams, Consensus::DEPLOYMENT_CSV, versionbitscache) == THRESHOLD_ACTIVE) {
+    if (IsCsvEnabled(pindexPrev, consensusParams)) {
         nLockTimeFlags |= LOCKTIME_MEDIAN_TIME_PAST;
     }
 
